@@ -62,6 +62,15 @@
   "feature.discordSidebar.title": {
     "defaultMessage": "Discord sidebar"
   },
+  "feature.downloadRename.description": {
+    "defaultMessage": "Rename downloaded files using a custom template. Available placeholders: [slug], [version], [game_version]."
+  },
+  "feature.downloadRename.template": {
+    "defaultMessage": "Filename template"
+  },
+  "feature.downloadRename.title": {
+    "defaultMessage": "Rename downloads"
+  },
   "feature.galleryBackground.description": {
     "defaultMessage": "Display the featured gallery image as a background banner on project pages."
   },

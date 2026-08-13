@@ -23,7 +23,7 @@ export default defineConfig({
 			128: '/icon-128.png',
 		},
 		permissions: ['cookies', 'storage', 'alarms'],
-		optional_permissions: ['notifications'],
+		optional_permissions: ['notifications', 'downloads'],
 		host_permissions: [
 			'https://modrinth.com/*',
 			'https://api.modrinth.com/*',

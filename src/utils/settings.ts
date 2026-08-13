@@ -48,6 +48,7 @@ export interface ExtensionSettings {
 	desktopNotifications: { enabled: boolean }
 	curseforgeRedirect: { enabled: boolean }
 	accentColor: { enabled: boolean; color: string }
+	downloadRename: { enabled: boolean; template: string }
 	telemetry: { enabled: boolean }
 }
 
@@ -76,6 +77,7 @@ export const DEFAULTS: ExtensionSettings = {
 	desktopNotifications: { enabled: false },
 	curseforgeRedirect: { enabled: false },
 	accentColor: { enabled: false, color: '#1bd96a' },
+	downloadRename: { enabled: false, template: '[slug]_[version]_[game_version]' },
 	telemetry: { enabled: true },
 }
 

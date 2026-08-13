@@ -8,6 +8,7 @@ import {
 	updateBadge,
 } from '../background/badge'
 import { handleNotificationClick } from '../background/browser-notifications'
+import { registerDownloadRenameListener } from '../background/download-rename'
 import { fetchDiscordInvite } from '../background/external/discord'
 import { fetchRepositoryStats } from '../background/external/repository'
 import { detectBrowserLocale } from '../utils/i18n'
@@ -44,9 +45,13 @@ export default defineBackground(() => {
 	})
 
 	browser.notifications?.onClicked.addListener(handleNotificationClick)
+	registerDownloadRenameListener()
 	browser.permissions.onAdded.addListener((permissions) => {
 		if (permissions.permissions?.includes('notifications')) {
 			browser.notifications.onClicked.addListener(handleNotificationClick)
+		}
+		if (permissions.permissions?.includes('downloads')) {
+			registerDownloadRenameListener()
 		}
 	})
 

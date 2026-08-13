@@ -174,7 +174,19 @@
 					:disabled-tooltip="f.disabledTooltip"
 					@update:model-value="updateEnabled(f.key, $event)"
 					@action="f.onAction?.()"
-				/>
+				>
+					<template v-if="f.options">
+						<template v-for="opt in f.options" :key="opt.key">
+							<OptionFieldText
+								v-if="opt.type === 'text'"
+								:label="opt.label"
+								:model-value="(settings[f.key] as unknown as Record<string, string>)[opt.key] ?? ''"
+								:placeholder="opt.placeholder"
+								@update:model-value="updateOption(f.key, opt.key, $event)"
+							/>
+						</template>
+					</template>
+				</FeatureRow>
 			</FeatureGroup>
 		</ScrollablePanel>
 
@@ -246,6 +258,7 @@ import {
 	CurrencyIcon,
 	CurseForgeIcon,
 	DiscordIcon,
+	DownloadIcon,
 	GitGraphIcon,
 	ImageIcon,
 	LanguagesIcon,
@@ -293,6 +306,7 @@ import FeatureGroup from './components/FeatureGroup.vue'
 import FeatureRow from './components/FeatureRow.vue'
 import OptionFieldColor from './components/OptionFieldColor.vue'
 import OptionFieldSelect, { type SelectItem } from './components/OptionFieldSelect.vue'
+import OptionFieldText from './components/OptionFieldText.vue'
 import SurveyCard from './components/SurveyCard.vue'
 
 const { formatMessage } = useVIntl()
@@ -520,6 +534,19 @@ const messages = defineMessages({
 		id: 'feature.curseforgeRedirect.description',
 		defaultMessage: 'Redirect CurseForge project pages to Modrinth when available.',
 	},
+	'feature.downloadRename.title': {
+		id: 'feature.downloadRename.title',
+		defaultMessage: 'Rename downloads',
+	},
+	'feature.downloadRename.description': {
+		id: 'feature.downloadRename.description',
+		defaultMessage:
+			'Rename downloaded files using a custom template. Available placeholders: [slug], [version], [game_version].',
+	},
+	'feature.downloadRename.template': {
+		id: 'feature.downloadRename.template',
+		defaultMessage: 'Filename template',
+	},
 	'feature.telemetry.title': { id: 'feature.telemetry.title', defaultMessage: 'Telemetry' },
 	'feature.telemetry.description': {
 		id: 'feature.telemetry.description',
@@ -541,13 +568,14 @@ type FeatureKey = Exclude<keyof ExtensionSettings, 'locale'>
 
 interface FeatureOption {
 	key: string
-	type: 'select' | 'color'
+	type: 'select' | 'color' | 'text'
 	label: string
 	items?: SelectItem[]
 	fetchItems?: () => Promise<SelectItem[]>
 	searchable?: boolean
 	includeAny?: boolean
 	defaultColor?: string
+	placeholder?: string
 }
 
 const MOD_MANAGER_ITEMS: SelectItem[] = [
@@ -794,6 +822,20 @@ const extensionFeatures = computed<FeatureDef[]>(() => [
 		description: formatMessage(messages['feature.curseforgeRedirect.description']),
 	},
 	{
+		key: 'downloadRename',
+		icon: DownloadIcon,
+		title: formatMessage(messages['feature.downloadRename.title']),
+		description: formatMessage(messages['feature.downloadRename.description']),
+		options: [
+			{
+				key: 'template',
+				type: 'text',
+				label: formatMessage(messages['feature.downloadRename.template']),
+				placeholder: DEFAULTS.downloadRename.template,
+			},
+		],
+	},
+	{
 		key: 'telemetry',
 		icon: ChartIcon,
 		title: formatMessage(messages['feature.telemetry.title']),
@@ -811,6 +853,13 @@ async function updateEnabled(key: FeatureKey, enabled: boolean) {
 		const granted = await browser.permissions.request({ permissions: ['notifications'] })
 		if (!granted) {
 			settings.desktopNotifications.enabled = false
+			await saveSettings(settings as ExtensionSettings)
+		}
+	}
+	if (key === 'downloadRename' && enabled) {
+		const granted = await browser.permissions.request({ permissions: ['downloads'] })
+		if (!granted) {
+			settings.downloadRename.enabled = false
 			await saveSettings(settings as ExtensionSettings)
 		}
 	}
@@ -881,6 +930,14 @@ onMounted(async () => {
 		const granted = await browser.permissions.contains({ permissions: ['notifications'] })
 		if (!granted) {
 			settings.desktopNotifications.enabled = false
+			await saveSettings(settings as ExtensionSettings)
+		}
+	}
+
+	if (loaded.downloadRename.enabled) {
+		const granted = await browser.permissions.contains({ permissions: ['downloads'] })
+		if (!granted) {
+			settings.downloadRename.enabled = false
 			await saveSettings(settings as ExtensionSettings)
 		}
 	}
