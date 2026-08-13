@@ -37,8 +37,7 @@ export function registerDownloadRenameListener() {
 				const extension = originalFilename.includes('.')
 					? originalFilename.slice(originalFilename.lastIndexOf('.'))
 					: ''
-				const filename =
-					sanitizeFilename(applyTemplate(downloadRename.template, info)) + extension
+				const filename = sanitizeFilename(applyTemplate(downloadRename.template, info)) + extension
 				console.log(`[Modrinth Extras] Download rename: "${originalFilename}" -> "${filename}"`)
 				suggest({ filename, conflictAction: 'uniquify' })
 			} catch (err) {
